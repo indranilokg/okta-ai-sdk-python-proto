@@ -1,0 +1,380 @@
+Metadata-Version: 2.4
+Name: okta-ai-sdk-proto
+Version: 1.0.0a1
+Summary: Comprehensive Okta SDK for AI applications with Token Exchange and Cross-App Access (ID-JAG) support
+Home-page: https://github.com/okta/okta-ai-sdk-proto
+Author: Okta Inc.
+Author-email: developers@okta.com
+License: MIT
+Project-URL: Homepage, https://github.com/okta/okta-ai-sdk-proto
+Project-URL: Repository, https://github.com/okta/okta-ai-sdk-proto
+Project-URL: Documentation, https://github.com/okta/okta-ai-sdk-proto#readme
+Project-URL: Bug Tracker, https://github.com/okta/okta-ai-sdk-proto/issues
+Keywords: okta,ai,token-exchange,cross-app-access,id-jag,oauth,jwt,authentication,authorization,langraph
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Security
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.28.0
+Requires-Dist: PyJWT>=2.6.0
+Requires-Dist: cryptography>=3.4.8
+Requires-Dist: pydantic>=1.10.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: isort>=5.10.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "test"
+Requires-Dist: pytest-cov>=4.0.0; extra == "test"
+Requires-Dist: httpx>=0.24.0; extra == "test"
+Dynamic: author-email
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# Okta AI SDK for Python
+
+A comprehensive Python SDK for Okta AI applications with support for Token Exchange and Cross-App Access (ID-JAG). Perfect for LangGraph agents and other AI applications that need secure authentication and authorization.
+
+## Features
+
+- 🔄 **Token Exchange**: OAuth 2.0 Token Exchange (RFC 8693) implementation
+- 🌐 **Cross-App Access**: Identity Assertion Authorization Grant (ID-JAG) for secure cross-application access
+- 🛡️ **Security**: Built-in token verification and validation
+- 🐍 **Python**: Full Python 3.8+ support with comprehensive type hints
+- 🤖 **AI-Ready**: Designed for LangGraph agents and AI applications
+- 📦 **Type Safety**: Full Pydantic model support with validation
+
+## Installation
+
+```bash
+pip install okta-ai-sdk-proto
+```
+
+### Development Installation
+
+```bash
+git clone https://github.com/okta/okta-ai-sdk-proto.git
+cd okta-ai-sdk-proto
+pip install -e .
+```
+
+## Quick Start
+
+### Basic Setup
+
+```python
+from okta_ai_sdk import OktaAISDK, OktaAIConfig
+
+# Initialize the SDK
+config = OktaAIConfig(
+    okta_domain="https://your-domain.okta.com",
+    client_id="YOUR_CLIENT_ID",
+    client_secret="YOUR_CLIENT_SECRET",  # Optional
+    authorization_server_id="default"  # Optional, defaults to 'default'
+)
+
+sdk = OktaAISDK(config)
+```
+
+### Token Exchange
+
+```python
+from okta_ai_sdk import TokenExchangeRequest
+
+# Exchange an access token for a new token with different audience
+result = sdk.token_exchange.exchange_token(
+    TokenExchangeRequest(
+        subject_token="YOUR_ACCESS_TOKEN",
+        subject_token_type="urn:ietf:params:oauth:token-type:access_token",
+        audience="https://api.example.com",
+        scope="read write"
+    )
+)
+
+print(f"New token: {result.access_token}")
+```
+
+### Cross-App Access (ID-JAG)
+
+```python
+# Exchange ID token for ID-JAG token (convenience method)
+id_jag_result = sdk.cross_app_access.exchange_id_token(
+    id_token="YOUR_ID_TOKEN",
+    audience="http://localhost:5001"
+)
+
+print(f"ID-JAG token: {id_jag_result.access_token}")
+
+# Verify ID-JAG token
+verification_result = sdk.cross_app_access.verify_id_jag_token_with_config(
+    token=id_jag_result.access_token,
+    audience="http://localhost:5001"
+)
+
+if verification_result.valid:
+    print(f"Token verified for subject: {verification_result.sub}")
+```
+
+## LangGraph Agent Integration
+
+Here's how to use the SDK with LangGraph agents:
+
+```python
+from typing import Dict, Any, List
+from dataclasses import dataclass
+from okta_ai_sdk import OktaAISDK, OktaAIConfig, TokenExchangeRequest
+
+@dataclass
+class AgentState:
+    user_id: str
+    access_token: str
+    id_token: str
+    messages: List[Dict[str, Any]]
+    exchanged_tokens: Dict[str, str] = None
+    
+    def __post_init__(self):
+        if self.exchanged_tokens is None:
+            self.exchanged_tokens = {}
+
+class OktaSecureAgent:
+    def __init__(self, config: OktaAIConfig):
+        self.sdk = OktaAISDK(config)
+    
+    def authenticate_user(self, state: AgentState) -> AgentState:
+        """Authenticate user and validate tokens"""
+        # Validate and verify tokens
+        verification_result = self.sdk.token_exchange.verify_token(
+            token=state.access_token,
+            options={
+                "issuer": self.sdk.config.okta_domain,
+                "audience": "api://default"
+            }
+        )
+        
+        if verification_result.valid:
+            print(f"User authenticated: {verification_result.sub}")
+        
+        return state
+    
+    def exchange_token_for_app(self, state: AgentState, app_audience: str) -> AgentState:
+        """Exchange token for specific application access"""
+        result = self.sdk.token_exchange.exchange_token(
+            TokenExchangeRequest(
+                subject_token=state.access_token,
+                subject_token_type="urn:ietf:params:oauth:token-type:access_token",
+                audience=app_audience,
+                scope="read write"
+            )
+        )
+        
+        state.exchanged_tokens[app_audience] = result.access_token
+        return state
+```
+
+## API Reference
+
+### Core SDK
+
+#### `OktaAISDK`
+
+Main SDK class providing access to all functionality.
+
+```python
+sdk = OktaAISDK(config)
+```
+
+**Methods:**
+- `get_config()`: Get current configuration
+- `update_config(updates)`: Update configuration
+
+### Token Exchange
+
+#### `TokenExchangeClient`
+
+Implements OAuth 2.0 Token Exchange (RFC 8693).
+
+**Methods:**
+- `exchange_token(request)`: Exchange a token for a new token
+- `verify_token(token, options)`: Verify a token using JWKS
+- `validate_token_format(token)`: Basic token format validation
+
+### Cross-App Access
+
+#### `CrossAppAccessClient`
+
+Implements Identity Assertion Authorization Grant (ID-JAG) for secure cross-application access.
+
+**Methods:**
+- `exchange_id_token(id_token, audience)`: Exchange ID token for ID-JAG token (convenience method)
+- `exchange_id_token_for_id_jag(request)`: Exchange ID token for ID-JAG token (explicit request)
+- `verify_id_jag_token(token, options)`: Verify ID-JAG token with explicit options
+- `verify_id_jag_token_with_config(token, audience)`: Verify ID-JAG token using SDK configuration
+- `validate_id_jag_token_format(token)`: Basic ID-JAG token format validation
+
+## Configuration
+
+### Environment Variables
+
+You can use environment variables for configuration:
+
+```bash
+export OKTA_DOMAIN="https://your-domain.okta.com"
+export OKTA_CLIENT_ID="your-client-id"
+export OKTA_CLIENT_SECRET="your-client-secret"
+```
+
+```python
+import os
+from okta_ai_sdk import OktaAIConfig
+
+config = OktaAIConfig(
+    okta_domain=os.getenv("OKTA_DOMAIN"),
+    client_id=os.getenv("OKTA_CLIENT_ID"),
+    client_secret=os.getenv("OKTA_CLIENT_SECRET")
+)
+```
+
+### Configuration Options
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| `okta_domain` | str | Yes | - | Okta domain (e.g., 'https://your-domain.okta.com') |
+| `client_id` | str | Yes | - | Okta client ID |
+| `client_secret` | str | No | None | Okta client secret (optional) |
+| `authorization_server_id` | str | No | 'default' | Authorization server ID |
+| `timeout` | int | No | 30000 | Request timeout in milliseconds |
+| `retry_attempts` | int | No | 3 | Number of retry attempts |
+
+## Error Handling
+
+The SDK provides comprehensive error handling with structured error objects:
+
+```python
+from okta_ai_sdk import SDKError
+
+try:
+    result = sdk.token_exchange.exchange_token(request)
+except SDKError as e:
+    print(f"Error code: {e.code}")
+    print(f"Error message: {e.message}")
+    print(f"Status code: {e.status_code}")
+    print(f"Details: {e.details}")
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `TOKEN_EXCHANGE_FAILED` | Token exchange request failed |
+| `TOKEN_EXCHANGE_ERROR` | General token exchange error |
+| `ID_JAG_TOKEN_EXCHANGE_FAILED` | ID-JAG token exchange failed |
+| `ID_JAG_TOKEN_EXCHANGE_ERROR` | General ID-JAG token exchange error |
+| `MISSING_CLIENT_SECRET` | Client secret required but not provided |
+| `INVALID_TOKEN_FORMAT` | Token format validation failed |
+| `TOKEN_VERIFICATION_FAILED` | Token verification failed |
+
+## Examples
+
+See the `examples/` directory for complete working examples:
+
+- **Basic Usage**: `examples/basic_usage.py`
+- **LangGraph Agent**: `examples/langraph_agent_example.py`
+
+## Development
+
+### Setup Development Environment
+
+```bash
+git clone https://github.com/okta/okta-ai-sdk-proto.git
+cd okta-ai-sdk-proto
+pip install -e ".[dev]"
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=okta_ai_sdk --cov-report=html
+
+# Run specific test file
+pytest tests/test_token_exchange.py
+```
+
+### Code Quality
+
+```bash
+# Format code
+black src/ tests/ examples/
+
+# Sort imports
+isort src/ tests/ examples/
+
+# Type checking
+mypy src/
+
+# Linting
+flake8 src/ tests/ examples/
+```
+
+## Requirements
+
+- Python 3.8+
+- Okta Developer Account
+- OAuth 2.0 application with Token Exchange and ID-JAG enabled
+
+## Dependencies
+
+- `requests>=2.28.0` - HTTP client
+- `PyJWT>=2.6.0` - JWT handling
+- `cryptography>=3.4.8` - Cryptographic operations
+- `pydantic>=1.10.0` - Data validation and settings
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## Support
+
+- 📖 [Documentation](https://github.com/okta/okta-ai-sdk-proto#readme)
+- 🐛 [Issue Tracker](https://github.com/okta/okta-ai-sdk-proto/issues)
+- 💬 [Discussions](https://github.com/okta/okta-ai-sdk-proto/discussions)
+
+## Changelog
+
+### 1.0.0-alpha.1
+
+- Initial release
+- Token Exchange support
+- Cross-App Access (ID-JAG) support
+- LangGraph agent integration examples
+- Comprehensive error handling
+- Full type safety with Pydantic
+
