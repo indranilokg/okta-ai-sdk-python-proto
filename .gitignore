@@ -208,3 +208,6 @@ docs/_build/
 # Local development
 local/
 local_*
+
+# Example files with sensitive data
+examples/basic_usage.py
