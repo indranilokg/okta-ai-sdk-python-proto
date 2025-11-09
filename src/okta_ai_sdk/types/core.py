@@ -14,6 +14,8 @@ class OktaAIConfig(BaseModel):
     authorization_server_id: Optional[str] = Field("default", description="Authorization server ID")
     timeout: Optional[int] = Field(30000, description="Request timeout in milliseconds")
     retry_attempts: Optional[int] = Field(3, description="Number of retry attempts")
+    principal_id: Optional[str] = Field(None, description="Agent/Workload Principal ID for JWT bearer assertion (e.g., 'wlpJ46tr4ks0JJi081t7')")
+    private_jwk: Optional[Dict[str, Any]] = Field(None, description="JWK-formatted private key for JWT bearer assertion")
 
     class Config:
         """Pydantic configuration"""
@@ -25,6 +27,8 @@ class OktaAIConfig(BaseModel):
             'authorization_server_id': 'authorizationServerId',
             'timeout': 'timeout',
             'retry_attempts': 'retryAttempts',
+            'principal_id': 'principalId',
+            'private_jwk': 'privateJWK',
         }.get(field_name, field_name)
 
 

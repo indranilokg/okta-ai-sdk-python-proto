@@ -19,6 +19,10 @@ from .cross_app_access import (
     IdJagTokenResponse,
     IdJagTokenVerificationOptions,
     IdJagTokenVerificationResult,
+    AuthServerTokenRequest,
+    AuthServerTokenResponse,
+    AuthServerTokenVerificationOptions,
+    AuthServerTokenVerificationResult,
 )
 
 __all__ = [
@@ -37,5 +41,9 @@ __all__ = [
     "IdJagTokenResponse",
     "IdJagTokenVerificationOptions",
     "IdJagTokenVerificationResult",
+    "AuthServerTokenRequest",
+    "AuthServerTokenResponse",
+    "AuthServerTokenVerificationOptions",
+    "AuthServerTokenVerificationResult",
 ]
 

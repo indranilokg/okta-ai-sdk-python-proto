@@ -26,6 +26,10 @@ from .types import (
     IdJagTokenResponse,
     IdJagTokenVerificationOptions,
     IdJagTokenVerificationResult,
+    AuthServerTokenRequest,
+    AuthServerTokenResponse,
+    AuthServerTokenVerificationOptions,
+    AuthServerTokenVerificationResult,
 )
 
 __version__ = "1.0.0-alpha.1"
@@ -54,5 +58,9 @@ __all__ = [
     "IdJagTokenResponse",
     "IdJagTokenVerificationOptions",
     "IdJagTokenVerificationResult",
+    "AuthServerTokenRequest",
+    "AuthServerTokenResponse",
+    "AuthServerTokenVerificationOptions",
+    "AuthServerTokenVerificationResult",
 ]
 
