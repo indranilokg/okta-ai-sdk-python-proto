@@ -264,8 +264,11 @@ class CrossAppAccessClient:
             # Create JWK client
             jwks_client = PyJWKClient(jwks_uri)
 
+            # Ensure token is bytes (some versions of PyJWT require this)
+            token_bytes = token.encode('utf-8') if isinstance(token, str) else token
+
             # Get the signing key
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            signing_key = jwks_client.get_signing_key_from_jwt(token_bytes)
 
             # Verify the token
             payload = jwt.decode(
@@ -454,8 +457,11 @@ class CrossAppAccessClient:
             # Create JWK client
             jwks_client = PyJWKClient(jwks_uri)
 
+            # Ensure token is bytes (some versions of PyJWT require this)
+            token_bytes = token.encode('utf-8') if isinstance(token, str) else token
+
             # Get the signing key
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            signing_key = jwks_client.get_signing_key_from_jwt(token_bytes)
 
             # Verify the token
             payload = jwt.decode(
