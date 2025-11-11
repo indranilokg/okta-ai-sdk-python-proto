@@ -147,8 +147,8 @@ class CrossAppAccessClient:
         Based on RFC 8693 (OAuth 2.0 Token Exchange) with ID-JAG extension
         """
         try:
-            print("🔄 Exchanging ID token for ID-JAG token...")
-            print(f"📍 Audience: {request.audience}")
+            print(" Exchanging ID token for ID-JAG token...")
+            print(f" Audience: {request.audience}")
 
             # Prepare the token exchange request - Cross App Access uses org auth server
             token_exchange_url = f"{self.config.okta_domain}/oauth2/v1/token"
@@ -173,7 +173,7 @@ class CrossAppAccessClient:
             
             if principal_id and private_jwk:
                 # Use JWT bearer assertion
-                print("🔐 Using JWT bearer assertion for client authentication")
+                print(" Using JWT bearer assertion for client authentication")
                 assertion_audience = f"{self.config.okta_domain}/oauth2/v1/token"
                 client_assertion = self._generate_jwt_assertion(
                     principal_id=principal_id,
@@ -184,12 +184,12 @@ class CrossAppAccessClient:
                 form_data['client_assertion'] = client_assertion
             elif request.client_id and request.client_secret:
                 # Use client_id/client_secret
-                print(f"🔐 Using client_id/client_secret for authentication")
+                print(f" Using client_id/client_secret for authentication")
                 form_data['client_id'] = request.client_id
                 form_data['client_secret'] = request.client_secret
             elif self.config.client_id and self.config.client_secret:
                 # Use config client credentials
-                print(f"🔐 Using config client_id/client_secret for authentication")
+                print(f" Using config client_id/client_secret for authentication")
                 form_data['client_id'] = self.config.client_id
                 form_data['client_secret'] = self.config.client_secret
             else:
@@ -198,7 +198,7 @@ class CrossAppAccessClient:
                     'MISSING_AUTH_CREDENTIALS'
                 )
 
-            print(f"🌐 Making ID-JAG token exchange request to: {token_exchange_url}")
+            print(f" Making ID-JAG token exchange request to: {token_exchange_url}")
 
             response = self.session.post(
                 token_exchange_url,
@@ -209,14 +209,14 @@ class CrossAppAccessClient:
             response.raise_for_status()
             response_data = response.json()
 
-            print("✅ ID-JAG token exchange successful")
-            print(f"🎯 Issued token type: {response_data.get('issued_token_type')}")
-            print(f"⏰ Expires in: {response_data.get('expires_in', 'N/A')} seconds")
+            print(" ID-JAG token exchange successful")
+            print(f" Issued token type: {response_data.get('issued_token_type')}")
+            print(f" Expires in: {response_data.get('expires_in', 'N/A')} seconds")
 
             return IdJagTokenResponse(**response_data)
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ ID-JAG token exchange failed: {e}")
+            print(f" ID-JAG token exchange failed: {e}")
             
             if hasattr(e, 'response') and e.response is not None:
                 try:
@@ -253,13 +253,13 @@ class CrossAppAccessClient:
         try:
             issuer = self.config.okta_domain
             
-            print("🔍 Verifying ID-JAG token...")
-            print(f"📍 Expected Issuer: {issuer}")
-            print(f"🎯 Expected Audience: {audience}")
+            print(" Verifying ID-JAG token...")
+            print(f" Expected Issuer: {issuer}")
+            print(f" Expected Audience: {audience}")
 
             # Determine JWKS URI
             jwks_uri = f"{issuer}/oauth2/v1/keys"
-            print(f"🔑 JWKS URI: {jwks_uri}")
+            print(f" JWKS URI: {jwks_uri}")
 
             # Create JWK client
             jwks_client = PyJWKClient(jwks_uri)
@@ -280,12 +280,12 @@ class CrossAppAccessClient:
                 options={"verify_exp": True, "verify_aud": True, "verify_iss": True}
             )
 
-            print("✅ ID-JAG token verified successfully")
-            print(f"👤 Subject: {payload.get('sub')}")
-            print(f"📧 Email: {payload.get('email', 'N/A')}")
-            print(f"🎯 Audience: {payload.get('aud')}")
-            print(f"📍 Issuer: {payload.get('iss')}")
-            print(f"⏰ Expires: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload.get('exp', 0)))}")
+            print(" ID-JAG token verified successfully")
+            print(f" Subject: {payload.get('sub')}")
+            print(f" Email: {payload.get('email', 'N/A')}")
+            print(f" Audience: {payload.get('aud')}")
+            print(f" Issuer: {payload.get('iss')}")
+            print(f" Expires: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload.get('exp', 0)))}")
 
             return IdJagTokenVerificationResult(
                 valid=True,
@@ -298,13 +298,13 @@ class CrossAppAccessClient:
             )
 
         except (InvalidTokenError, PyJWKError) as e:
-            print(f"❌ ID-JAG token verification failed: {e}")
+            print(f" ID-JAG token verification failed: {e}")
             return IdJagTokenVerificationResult(
                 valid=False,
                 error=str(e)
             )
         except Exception as e:
-            print(f"❌ ID-JAG token verification failed: {e}")
+            print(f" ID-JAG token verification failed: {e}")
             return IdJagTokenVerificationResult(
                 valid=False,
                 error=f"Unknown verification error: {str(e)}"
@@ -358,8 +358,8 @@ class CrossAppAccessClient:
         Uses JWT Bearer grant type (RFC 7523) with custom authorization server
         """
         try:
-            print("🔄 Exchanging ID-JAG token for authorization server token...")
-            print(f"📍 Authorization Server ID: {request.authorization_server_id}")
+            print(" Exchanging ID-JAG token for authorization server token...")
+            print(f" Authorization Server ID: {request.authorization_server_id}")
 
             # Prepare the authorization server token request
             auth_server_token_url = f"{self.config.okta_domain}/oauth2/{request.authorization_server_id}/v1/token"
@@ -376,7 +376,7 @@ class CrossAppAccessClient:
             
             if principal_id and private_jwk:
                 # Use JWT bearer assertion
-                print("🔐 Using JWT bearer assertion for client authentication")
+                print(" Using JWT bearer assertion for client authentication")
                 assertion_audience = f"{self.config.okta_domain}/oauth2/{request.authorization_server_id}/v1/token"
                 client_assertion = self._generate_jwt_assertion(
                     principal_id=principal_id,
@@ -391,7 +391,7 @@ class CrossAppAccessClient:
                     'MISSING_AUTH_CREDENTIALS'
                 )
 
-            print(f"🌐 Making authorization server token request to: {auth_server_token_url}")
+            print(f" Making authorization server token request to: {auth_server_token_url}")
 
             response = self.session.post(
                 auth_server_token_url,
@@ -402,15 +402,15 @@ class CrossAppAccessClient:
             response.raise_for_status()
             response_data = response.json()
 
-            print("✅ Authorization server token exchange successful")
-            print(f"⏰ Expires in: {response_data.get('expires_in', 'N/A')} seconds")
+            print(" Authorization server token exchange successful")
+            print(f" Expires in: {response_data.get('expires_in', 'N/A')} seconds")
             if response_data.get('scope'):
-                print(f"🎯 Scope: {response_data.get('scope')}")
+                print(f" Scope: {response_data.get('scope')}")
 
             return AuthServerTokenResponse(**response_data)
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ Authorization server token exchange failed: {e}")
+            print(f" Authorization server token exchange failed: {e}")
             
             if hasattr(e, 'response') and e.response is not None:
                 try:
@@ -449,10 +449,10 @@ class CrossAppAccessClient:
             issuer = f"{self.config.okta_domain}/oauth2/{authorization_server_id}"
             jwks_uri = f"{issuer}/v1/keys"
             
-            print("🔍 Verifying authorization server token...")
-            print(f"📍 Expected Issuer: {issuer}")
-            print(f"🎯 Expected Audience: {audience}")
-            print(f"🔑 JWKS URI: {jwks_uri}")
+            print(" Verifying authorization server token...")
+            print(f" Expected Issuer: {issuer}")
+            print(f" Expected Audience: {audience}")
+            print(f" JWKS URI: {jwks_uri}")
 
             # Create JWK client
             jwks_client = PyJWKClient(jwks_uri)
@@ -484,14 +484,14 @@ class CrossAppAccessClient:
             # Use scp if available, otherwise fallback to scope
             scope_value = ' '.join(token_scp) if token_scp else token_scope
 
-            print("✅ Authorization server token verified successfully")
-            print(f"👤 Subject: {payload.get('sub')}")
-            print(f"📧 Email: {payload.get('email', 'N/A')}")
-            print(f"🎯 Audience: {payload.get('aud')}")
-            print(f"📍 Issuer: {payload.get('iss')}")
+            print(" Authorization server token verified successfully")
+            print(f" Subject: {payload.get('sub')}")
+            print(f" Email: {payload.get('email', 'N/A')}")
+            print(f" Audience: {payload.get('aud')}")
+            print(f" Issuer: {payload.get('iss')}")
             if scope_value:
-                print(f"🔐 Scope: {scope_value}")
-            print(f"⏰ Expires: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload.get('exp', 0)))}")
+                print(f" Scope: {scope_value}")
+            print(f" Expires: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload.get('exp', 0)))}")
 
             return AuthServerTokenVerificationResult(
                 valid=True,
@@ -505,13 +505,13 @@ class CrossAppAccessClient:
             )
 
         except (InvalidTokenError, PyJWKError) as e:
-            print(f"❌ Authorization server token verification failed: {e}")
+            print(f" Authorization server token verification failed: {e}")
             return AuthServerTokenVerificationResult(
                 valid=False,
                 error=str(e)
             )
         except Exception as e:
-            print(f"❌ Authorization server token verification failed: {e}")
+            print(f" Authorization server token verification failed: {e}")
             return AuthServerTokenVerificationResult(
                 valid=False,
                 error=f"Unknown verification error: {str(e)}"

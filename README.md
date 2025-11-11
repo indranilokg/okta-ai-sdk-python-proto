@@ -1,17 +1,17 @@
 # Okta AI SDK for Python
 
-> **⚠️ IMPORTANT NOTICE: This is a sample prototype implementation and is NOT an official Okta product. This SDK is provided for demonstration and experimentation purposes only. Do not use this in production environments. For official Okta SDKs and support, please visit [developer.okta.com](https://developer.okta.com).**
+> ** IMPORTANT NOTICE: This is a sample prototype implementation and is NOT an official Okta product. This SDK is provided for demonstration and experimentation purposes only. Do not use this in production environments. For official Okta SDKs and support, please visit [developer.okta.com](https://developer.okta.com).**
 
 A comprehensive Python SDK for Okta AI applications with support for Token Exchange and Cross-App Access (ID-JAG). Perfect for LangGraph agents and other AI applications that need secure authentication and authorization.
 
 ## Features
 
-- 🔄 **Token Exchange**: OAuth 2.0 Token Exchange (RFC 8693) implementation
-- 🌐 **Cross-App Access**: Identity Assertion Authorization Grant (ID-JAG) for secure cross-application access
-- 🛡️ **Security**: Built-in token verification and validation
-- 🐍 **Python**: Full Python 3.8+ support with comprehensive type hints
-- 🤖 **AI-Ready**: Designed for LangGraph agents and AI applications
-- 📦 **Type Safety**: Full Pydantic model support with validation
+-  **Token Exchange**: OAuth 2.0 Token Exchange (RFC 8693) implementation
+-  **Cross-App Access**: Identity Assertion Authorization Grant (ID-JAG) for secure cross-application access
+-  **Security**: Built-in token verification and validation
+-  **Python**: Full Python 3.8+ support with comprehensive type hints
+-  **AI-Ready**: Designed for LangGraph agents and AI applications
+-  **Type Safety**: Full Pydantic model support with validation
 
 ## Installation
 
@@ -113,7 +113,7 @@ id_jag_result = sdk.cross_app_access.exchange_id_token(
     audience=id_jag_audience,
     scope="mcp:read"
 )
-print(f"✅ ID-JAG token obtained (expires in {id_jag_result.expires_in}s)")
+print(f" ID-JAG token obtained (expires in {id_jag_result.expires_in}s)")
 
 # STEP 2: Verify ID-JAG token
 # Validates signature, audience, issuer, and expiration
@@ -123,11 +123,11 @@ verification_result = sdk.cross_app_access.verify_id_jag_token(
 )
 
 if verification_result.valid:
-    print(f"✅ ID-JAG token verified")
+    print(f" ID-JAG token verified")
     print(f"   Subject: {verification_result.sub}")
     print(f"   Audience: {verification_result.aud}")
 else:
-    print(f"❌ ID-JAG verification failed: {verification_result.error}")
+    print(f" ID-JAG verification failed: {verification_result.error}")
     exit(1)
 
 # STEP 3: Exchange ID-JAG token for authorization server token
@@ -142,7 +142,7 @@ auth_server_request = AuthServerTokenRequest(
 auth_server_result = sdk.cross_app_access.exchange_id_jag_for_auth_server_token(
     auth_server_request
 )
-print(f"✅ Authorization server token obtained (expires in {auth_server_result.expires_in}s)")
+print(f" Authorization server token obtained (expires in {auth_server_result.expires_in}s)")
 
 # STEP 4: Verify authorization server token
 # Token will be used with your resource server
@@ -155,13 +155,13 @@ verification_result = sdk.cross_app_access.verify_auth_server_token(
 )
 
 if verification_result.valid:
-    print(f"✅ Authorization server token verified")
+    print(f" Authorization server token verified")
     print(f"   Subject: {verification_result.sub}")
     print(f"   Audience: {verification_result.aud}")
     print(f"   Scope: {verification_result.scope}")
-    print(f"\n✅ Token ready to use with resource server!")
+    print(f"\n Token ready to use with resource server!")
 else:
-    print(f"❌ Token verification failed: {verification_result.error}")
+    print(f" Token verification failed: {verification_result.error}")
     exit(1)
 ```
 
@@ -205,10 +205,10 @@ class OktaSecureAgent:
         )
         
         if verification_result.valid:
-            print(f"✅ User authenticated: {verification_result.sub}")
+            print(f" User authenticated: {verification_result.sub}")
             return state
         
-        raise Exception(f"❌ Authentication failed: {verification_result.error}")
+        raise Exception(f" Authentication failed: {verification_result.error}")
     
     def exchange_token_for_app(self, state: AgentState, app_audience: str) -> AgentState:
         """Exchange token for specific application access (Token Exchange)"""
@@ -238,7 +238,7 @@ class OktaSecureAgent:
             scope="mcp:read"
         )
         state.id_jag_token = id_jag_result.access_token
-        print(f"✅ STEP 1: ID-JAG token obtained")
+        print(f" STEP 1: ID-JAG token obtained")
         
         # STEP 2: Verify ID-JAG token
         verification_result = self.cross_app_sdk.cross_app_access.verify_id_jag_token(
@@ -249,7 +249,7 @@ class OktaSecureAgent:
         if not verification_result.valid:
             raise Exception(f"STEP 2: ID-JAG verification failed: {verification_result.error}")
         
-        print(f"✅ STEP 2: ID-JAG token verified for: {verification_result.sub}")
+        print(f" STEP 2: ID-JAG token verified for: {verification_result.sub}")
         
         # STEP 3: Exchange ID-JAG for authorization server token
         auth_server_request = AuthServerTokenRequest(
@@ -263,7 +263,7 @@ class OktaSecureAgent:
             auth_server_request
         )
         state.auth_server_token = auth_server_result.access_token
-        print(f"✅ STEP 3: Authorization server token obtained")
+        print(f" STEP 3: Authorization server token obtained")
         
         # STEP 4: Verify authorization server token
         resource_server_audience = "https://your-resource-server.com"  # Your resource server
@@ -274,10 +274,10 @@ class OktaSecureAgent:
         )
         
         if verification_result.valid:
-            print(f"✅ STEP 4: Authorization server token verified")
+            print(f" STEP 4: Authorization server token verified")
             return state
         
-        raise Exception(f"❌ STEP 4: Token verification failed: {verification_result.error}")
+        raise Exception(f" STEP 4: Token verification failed: {verification_result.error}")
 ```
 
 ## API Reference
@@ -451,118 +451,5 @@ cd okta-ai-sdk-proto
 pip install -e ".[dev]"
 ```
 
-### Running Tests
 
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=okta_ai_sdk --cov-report=html
-
-# Run specific test file
-pytest tests/test_token_exchange.py
-```
-
-### Code Quality
-
-```bash
-# Format code
-black src/ tests/ examples/
-
-# Sort imports
-isort src/ tests/ examples/
-
-# Type checking
-mypy src/
-
-# Linting
-flake8 src/ tests/ examples/
-```
-
-## Requirements
-
-- Python 3.8+
-- Okta Developer Account
-- OAuth 2.0 application with Token Exchange and ID-JAG enabled
-
-## Dependencies
-
-- `requests>=2.28.0` - HTTP client
-- `PyJWT>=2.6.0` - JWT handling
-- `cryptography>=3.4.8` - Cryptographic operations
-- `pydantic>=1.10.0` - Data validation and settings
-
-## License
-
-MIT License - see LICENSE file for details.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## Support
-
-- 📖 [Documentation](https://github.com/okta/okta-ai-sdk-proto#readme)
-- 🐛 [Issue Tracker](https://github.com/okta/okta-ai-sdk-proto/issues)
-- 💬 [Discussions](https://github.com/okta/okta-ai-sdk-proto/discussions)
-
-## Changelog
-
-### 1.0.0-alpha.6
-
-- **README Improvements**: Complete configuration documentation
-- Fixed repository folder name references (okta-ai-sdk-python-proto)
-- Added comprehensive setup examples for Token Exchange and ID-JAG
-- Documented all configuration parameters with examples
-- Simplified JWK documentation (removed verbose CRT parameter explanations)
-- Enhanced Cross-App Access example with validation and error handling
-- Complete 4-step ID-JAG flow documentation with JWT bearer details
-
-### 1.0.0-alpha.5
-
-- **README Consistency**: Fixed all code examples to use new simplified 4-method API
-- Removed obsolete "Convenience Method" section
-- Fixed imports (removed non-existent `AuthServerTokenVerificationOptions`)
-- Updated all method calls to match simplified signatures
-- Verified consistency across client.py, README.md, and test_package.py
-- Test README updated to document v1.0.0-alpha.4+ features
-
-### 1.0.0-alpha.4
-
-- **SIMPLIFIED API**: Removed all intermediate and convenience methods
-- **4 Core Methods Only**: `exchange_id_token()`, `verify_id_jag_token()`, `exchange_id_jag_for_auth_server_token()`, `verify_auth_server_token()`
-- Clean, focused API with no backward compatibility baggage
-- Updated LangGraph Agent Integration with simplified method signatures
-- Removed utility methods and duplicate implementations
-- All documentation updated to reflect the streamlined API
-
-### 1.0.0-alpha.3
-
-- Updated documentation with complete examples
-- Enhanced LangGraph Agent Integration with 4-step cross-app access flow
-- Comprehensive API reference for all methods
-- Added step-by-step examples for token exchange and cross-app access
-- Improved README with multi-organization setup guide
-
-### 1.0.0-alpha.2
-
-- Enhanced Cross-App Access with 4-step token exchange flow
-- Added `exchange_id_jag_for_auth_server_token()` method for authorization server token exchange
-- Added `verify_auth_server_token()` method for authorization server token verification
-- JWT bearer assertion with authorization server-specific audience
-- Full support for multi-organization token flows
-
-### 1.0.0-alpha.1
-
-- Initial release
-- Token Exchange support (RFC 8693)
-- Cross-App Access (ID-JAG) basic support
-- LangGraph agent integration examples
-- Comprehensive error handling
-- Full type safety with Pydantic
 

@@ -40,9 +40,9 @@ class TokenExchangeClient:
         Based on Okta's Token Exchange implementation
         """
         try:
-            print("🔄 Exchanging token...")
-            print(f"📍 Audience: {request.audience}")
-            print(f"🎯 Token Type: {request.subject_token_type}")
+            print(" Exchanging token...")
+            print(f" Audience: {request.audience}")
+            print(f" Token Type: {request.subject_token_type}")
 
             token_url = f"{self.config.okta_domain}/oauth2/{self.config.authorization_server_id}/v1/token"
             
@@ -64,7 +64,7 @@ class TokenExchangeClient:
             if request.requested_token_type:
                 form_data['requested_token_type'] = request.requested_token_type
 
-            print(f"🌐 Making token exchange request to: {token_url}")
+            print(f" Making token exchange request to: {token_url}")
 
             response = self.session.post(
                 token_url,
@@ -75,14 +75,14 @@ class TokenExchangeClient:
             response.raise_for_status()
             response_data = response.json()
 
-            print("✅ Token exchange successful")
-            print(f"🎯 Issued token type: {response_data.get('issued_token_type')}")
-            print(f"⏰ Expires in: {response_data.get('expires_in', 'N/A')} seconds")
+            print(" Token exchange successful")
+            print(f" Issued token type: {response_data.get('issued_token_type')}")
+            print(f" Expires in: {response_data.get('expires_in', 'N/A')} seconds")
 
             return TokenExchangeResponse(**response_data)
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ Token exchange failed: {e}")
+            print(f" Token exchange failed: {e}")
             
             if hasattr(e, 'response') and e.response is not None:
                 try:
@@ -112,9 +112,9 @@ class TokenExchangeClient:
         Similar to okta-jwt-verifier-js functionality
         """
         try:
-            print("🔍 Verifying token...")
-            print(f"📍 Expected Issuer: {options.issuer}")
-            print(f"🎯 Expected Audience: {options.audience}")
+            print(" Verifying token...")
+            print(f" Expected Issuer: {options.issuer}")
+            print(f" Expected Audience: {options.audience}")
 
             # Determine JWKS URI - use custom auth server if specified
             if options.jwks_uri:
@@ -127,7 +127,7 @@ class TokenExchangeClient:
                 else:
                     # Use default auth server
                     jwks_uri = f"{options.issuer}/oauth2/default/v1/keys"
-            print(f"🔑 JWKS URI: {jwks_uri}")
+            print(f" JWKS URI: {jwks_uri}")
 
             # Create JWK client
             jwks_client = PyJWKClient(jwks_uri)
@@ -167,7 +167,7 @@ class TokenExchangeClient:
                 missing_scopes = [scope for scope in expected_scopes if scope not in token_scp]
                 
                 if missing_scopes:
-                    print(f"❌ Scope validation failed: missing scopes {missing_scopes}")
+                    print(f" Scope validation failed: missing scopes {missing_scopes}")
                     print(f"   Expected: {expected_scopes}")
                     print(f"   Token has: {token_scp}")
                     return TokenVerificationResult(
@@ -175,13 +175,13 @@ class TokenExchangeClient:
                         error=f"Missing required scopes: {missing_scopes}"
                     )
 
-            print("✅ Token verified successfully")
-            print(f"👤 Subject: {payload.get('sub')}")
-            print(f"📧 Email: {payload.get('email', 'N/A')}")
-            print(f"🎯 Audience: {payload.get('aud')}")
-            print(f"📍 Issuer: {payload.get('iss')}")
-            print(f"🔐 Scopes: {token_scp if token_scp else 'N/A'}")
-            print(f"⏰ Expires: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload.get('exp', 0)))}")
+            print(" Token verified successfully")
+            print(f" Subject: {payload.get('sub')}")
+            print(f" Email: {payload.get('email', 'N/A')}")
+            print(f" Audience: {payload.get('aud')}")
+            print(f" Issuer: {payload.get('iss')}")
+            print(f" Scopes: {token_scp if token_scp else 'N/A'}")
+            print(f" Expires: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload.get('exp', 0)))}")
 
             return TokenVerificationResult(
                 valid=True,
@@ -196,13 +196,13 @@ class TokenExchangeClient:
             )
 
         except (InvalidTokenError, PyJWKError) as e:
-            print(f"❌ Token verification failed: {e}")
+            print(f" Token verification failed: {e}")
             return TokenVerificationResult(
                 valid=False,
                 error=str(e)
             )
         except Exception as e:
-            print(f"❌ Token verification failed: {e}")
+            print(f" Token verification failed: {e}")
             return TokenVerificationResult(
                 valid=False,
                 error=f"Unknown verification error: {str(e)}"

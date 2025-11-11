@@ -47,7 +47,7 @@ class OktaSecureAgent:
         
     def authenticate_user(self, state: AgentState) -> AgentState:
         """Authenticate user and validate tokens"""
-        print(f"🔐 Authenticating user: {state.user_id}")
+        print(f" Authenticating user: {state.user_id}")
         
         try:
             # Validate token format
@@ -66,14 +66,14 @@ class OktaSecureAgent:
             if not verification_result.valid:
                 raise SDKError("Token verification failed", "TOKEN_VERIFICATION_FAILED")
             
-            print(f"✅ User authenticated: {verification_result.sub}")
+            print(f" User authenticated: {verification_result.sub}")
             state.messages.append({
                 "role": "system",
                 "content": f"User {verification_result.sub} authenticated successfully"
             })
             
         except Exception as e:
-            print(f"❌ Authentication failed: {e}")
+            print(f" Authentication failed: {e}")
             state.messages.append({
                 "role": "system",
                 "content": f"Authentication failed: {str(e)}"
@@ -83,12 +83,12 @@ class OktaSecureAgent:
     
     def exchange_token_for_app(self, state: AgentState, app_audience: str) -> AgentState:
         """Exchange token for specific application access"""
-        print(f"🔄 Exchanging token for app: {app_audience}")
+        print(f" Exchanging token for app: {app_audience}")
         
         try:
             # Check if we already have a token for this app
             if app_audience in state.exchanged_tokens:
-                print(f"✅ Using cached token for {app_audience}")
+                print(f" Using cached token for {app_audience}")
                 return state
             
             # Create token exchange request
@@ -106,14 +106,14 @@ class OktaSecureAgent:
             state.exchanged_tokens[app_audience] = result.access_token
             state.current_app = app_audience
             
-            print(f"✅ Token exchanged for {app_audience}")
+            print(f" Token exchanged for {app_audience}")
             state.messages.append({
                 "role": "system",
                 "content": f"Token exchanged for application: {app_audience}"
             })
             
         except Exception as e:
-            print(f"❌ Token exchange failed: {e}")
+            print(f" Token exchange failed: {e}")
             state.messages.append({
                 "role": "system",
                 "content": f"Token exchange failed: {str(e)}"
@@ -123,7 +123,7 @@ class OktaSecureAgent:
     
     def get_cross_app_token(self, state: AgentState, target_app: str) -> AgentState:
         """Get ID-JAG token for cross-application access"""
-        print(f"🌐 Getting cross-app token for: {target_app}")
+        print(f" Getting cross-app token for: {target_app}")
         
         try:
             # Exchange ID token for ID-JAG token
@@ -135,14 +135,14 @@ class OktaSecureAgent:
             # Cache the ID-JAG token
             state.exchanged_tokens[f"id-jag:{target_app}"] = id_jag_result.access_token
             
-            print(f"✅ ID-JAG token obtained for {target_app}")
+            print(f" ID-JAG token obtained for {target_app}")
             state.messages.append({
                 "role": "system",
                 "content": f"Cross-app access token obtained for: {target_app}"
             })
             
         except Exception as e:
-            print(f"❌ Cross-app token exchange failed: {e}")
+            print(f" Cross-app token exchange failed: {e}")
             state.messages.append({
                 "role": "system",
                 "content": f"Cross-app token exchange failed: {str(e)}"
