@@ -19,7 +19,7 @@ class OktaAIConfig(BaseModel):
 
     class Config:
         """Pydantic configuration"""
-        validate_by_name = True
+        populate_by_name = True
         alias_generator = lambda field_name: {
             'okta_domain': 'oktaDomain',
             'client_id': 'clientId',
