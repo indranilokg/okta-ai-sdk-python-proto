@@ -106,12 +106,14 @@ if not sdk.config.principal_id or not sdk.config.private_jwk:
 
 id_jag_audience = f"{sdk.config.okta_domain}/oauth2/{sdk.config.authorization_server_id}"
 
-# STEP 1: Exchange ID token for ID-JAG token
+# STEP 1: Exchange ID token or access token for ID-JAG token
 # Uses JWT bearer assertion automatically from config
-id_jag_result = sdk.cross_app_access.exchange_id_token(
-    id_token="YOUR_ID_TOKEN",
+# token_type defaults to "id_token", can also be "access_token"
+id_jag_result = sdk.cross_app_access.exchange_token(
+    token="YOUR_ID_TOKEN",  # Can also be an access token
     audience=id_jag_audience,
-    scope="mcp:read"
+    scope="mcp:read",
+    token_type="id_token"  # Optional: "id_token" (default) or "access_token"
 )
 print(f" ID-JAG token obtained (expires in {id_jag_result.expires_in}s)")
 
@@ -232,8 +234,8 @@ class OktaSecureAgent:
         id_jag_audience = f"{self.cross_app_sdk.config.okta_domain}/oauth2/{self.cross_app_sdk.config.authorization_server_id}"
         
         # STEP 1: Exchange ID token for ID-JAG token
-        id_jag_result = self.cross_app_sdk.cross_app_access.exchange_id_token(
-            id_token=state.id_token,
+        id_jag_result = self.cross_app_sdk.cross_app_access.exchange_token(
+            token=state.id_token,
             audience=id_jag_audience,
             scope="mcp:read"
         )
@@ -316,7 +318,8 @@ Implements Identity Assertion Authorization Grant (ID-JAG) for secure cross-appl
 **Methods (4 Core Steps):**
 
 **STEP 1: ID-JAG Token Exchange**
-- `exchange_id_token(id_token, audience, scope=None)`: Exchange ID token for ID-JAG token
+- `exchange_token(token, audience, scope=None, token_type="id_token")`: Exchange ID token or access token for ID-JAG token
+  - `token_type`: "id_token" (default) or "access_token" to specify the type of subject token
   - Uses JWT bearer assertion or client credentials from SDK config
   - Returns: `IdJagTokenResponse`
 
@@ -449,6 +452,76 @@ See the `examples/` directory for complete working examples:
 git clone https://github.com/okta/okta-ai-sdk-proto.git
 cd okta-ai-sdk-proto
 pip install -e ".[dev]"
+```
+
+### Building and Publishing to PyPI
+
+#### Prerequisites
+
+```bash
+pip install build twine
+```
+
+#### Build Package
+
+```bash
+# Clean previous builds
+rm -rf build/ dist/ *.egg-info src/*.egg-info
+
+# Build source distribution and wheel
+python -m build
+```
+
+This creates:
+- `dist/okta-ai-sdk-proto-1.0.2.tar.gz` (source distribution)
+- `dist/okta_ai_sdk_proto-1.0.2-py3-none-any.whl` (wheel)
+
+#### Verify Build
+
+```bash
+# Check built files
+ls -lh dist/
+
+# Test installation locally
+pip install dist/okta_ai_sdk_proto-*.whl
+```
+
+#### Upload to TestPyPI (Recommended First)
+
+```bash
+python -m twine upload --repository testpypi dist/*
+```
+
+You'll be prompted for:
+- Username: `__token__`
+- Password: Your TestPyPI API token (get from https://test.pypi.org/manage/account/token/)
+
+#### Upload to Production PyPI
+
+```bash
+python -m twine upload dist/*
+```
+
+You'll be prompted for:
+- Username: `__token__`
+- Password: Your PyPI API token (get from https://pypi.org/manage/account/token/)
+
+**Important:** Once uploaded to PyPI, you cannot delete or modify the version. You can only upload new versions.
+
+#### Version Management
+
+When releasing a new version, update the version number in three places:
+
+1. `setup.py` - line 14: `version="X.Y.Z"`
+2. `pyproject.toml` - line 7: `version = "X.Y.Z"`
+3. `src/okta_ai_sdk/__init__.py` - line 35: `__version__ = "X.Y.Z"`
+
+Then commit and tag:
+```bash
+git add .
+git commit -m "Release version X.Y.Z"
+git tag -a vX.Y.Z -m "Version X.Y.Z"
+git push origin main --tags
 ```
 
 

@@ -1,0 +1,7 @@
+# Include LICENSE file (required for PyPI, not automatically included)
+include LICENSE
+
+# Include examples (optional but useful for users)
+recursive-include examples *.py
+recursive-include examples *.md
+

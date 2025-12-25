@@ -8,7 +8,7 @@ import json
 import base64
 import time
 import uuid
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Literal
 
 import requests
 import jwt
@@ -141,13 +141,14 @@ class CrossAppAccessClient:
                 'JWT_ASSERTION_GENERATION_FAILED'
             )
 
-    def _exchange_id_token_for_id_jag_internal(self, request: IdJagTokenRequest) -> IdJagTokenResponse:
+    def _exchange_token_for_id_jag_internal(self, request: IdJagTokenRequest) -> IdJagTokenResponse:
         """
-        Internal method: Exchange an Okta ID token for an ID-JAG token
+        Internal method: Exchange an Okta ID token or access token for an ID-JAG token
         Based on RFC 8693 (OAuth 2.0 Token Exchange) with ID-JAG extension
         """
         try:
-            print(" Exchanging ID token for ID-JAG token...")
+            token_type_label = "ID token" if request.subject_token_type == "urn:ietf:params:oauth:token-type:id_token" else "access token"
+            print(f" Exchanging {token_type_label} for ID-JAG token...")
             print(f" Audience: {request.audience}")
 
             # Prepare the token exchange request - Cross App Access uses org auth server
@@ -157,7 +158,7 @@ class CrossAppAccessClient:
                 'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
                 'requested_token_type': 'urn:ietf:params:oauth:token-type:id-jag',
                 'subject_token': request.subject_token,
-                'subject_token_type': 'urn:ietf:params:oauth:token-type:id_token',
+                'subject_token_type': request.subject_token_type,
                 'audience': request.audience,
             }
             
@@ -310,22 +311,38 @@ class CrossAppAccessClient:
                 error=f"Unknown verification error: {str(e)}"
             )
 
-    def exchange_id_token(
+    def exchange_token(
         self, 
-        id_token: str, 
+        token: str, 
         audience: str, 
-        scope: Optional[str] = None
+        scope: Optional[str] = None,
+        token_type: Literal["id_token", "access_token"] = "id_token"
     ) -> IdJagTokenResponse:
         """
-        STEP 1: Exchange ID token for ID-JAG token
+        STEP 1: Exchange ID token or access token for ID-JAG token
         
         Uses SDK configuration for authentication (principal_id/private_jwk or client_id/client_secret)
+        
+        Args:
+            token: The ID token or access token to exchange
+            audience: Target audience for the ID-JAG token
+            scope: Optional scope for the ID-JAG token
+            token_type: Type of token - "id_token" (default) or "access_token"
+                        The value is converted to the appropriate URN format internally
         """
+        # Convert token_type parameter to subject_token_type URN format
+        token_type_urn_map = {
+            "id_token": "urn:ietf:params:oauth:token-type:id_token",
+            "access_token": "urn:ietf:params:oauth:token-type:access_token"
+        }
+        subject_token_type = token_type_urn_map.get(token_type, "urn:ietf:params:oauth:token-type:id_token")
+        
         # Determine which authentication method to use
         if self.config.principal_id and self.config.private_jwk:
             # Use JWT bearer assertion
             request = IdJagTokenRequest(
-                subject_token=id_token,
+                subject_token=token,
+                subject_token_type=subject_token_type,
                 audience=audience,
                 scope=scope,
                 principal_id=self.config.principal_id,
@@ -334,7 +351,8 @@ class CrossAppAccessClient:
         elif self.config.client_id and self.config.client_secret:
             # Use client_id/client_secret
             request = IdJagTokenRequest(
-                subject_token=id_token,
+                subject_token=token,
+                subject_token_type=subject_token_type,
                 audience=audience,
                 scope=scope,
                 client_id=self.config.client_id,
@@ -346,7 +364,7 @@ class CrossAppAccessClient:
                 'MISSING_AUTH_CREDENTIALS'
             )
 
-        return self._exchange_id_token_for_id_jag_internal(request)
+        return self._exchange_token_for_id_jag_internal(request)
 
     def exchange_id_jag_for_auth_server_token(
         self, 

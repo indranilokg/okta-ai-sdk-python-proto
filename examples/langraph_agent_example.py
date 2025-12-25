@@ -127,8 +127,8 @@ class OktaSecureAgent:
         
         try:
             # Exchange ID token for ID-JAG token
-            id_jag_result = self.sdk.cross_app_access.exchange_id_token(
-                id_token=state.id_token,
+            id_jag_result = self.sdk.cross_app_access.exchange_token(
+                token=state.id_token,
                 audience=target_app
             )
             

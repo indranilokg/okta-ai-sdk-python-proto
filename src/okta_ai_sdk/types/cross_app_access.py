@@ -2,13 +2,17 @@
 Cross-App Access (ID-JAG) type definitions
 """
 
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, Literal
 from pydantic import BaseModel, Field
 
 
 class IdJagTokenRequest(BaseModel):
     """ID-JAG Token Request"""
-    subject_token: str = Field(..., description="The Okta ID token to exchange")
+    subject_token: str = Field(..., description="The Okta ID token or access token to exchange")
+    subject_token_type: Literal[
+        "urn:ietf:params:oauth:token-type:id_token",
+        "urn:ietf:params:oauth:token-type:access_token"
+    ] = Field("urn:ietf:params:oauth:token-type:id_token", description="Type of the subject token")
     audience: str = Field(..., description="Target audience (e.g., 'http://localhost:5001')")
     client_id: Optional[str] = Field(None, description="Okta client ID (required if using client_secret)")
     client_secret: Optional[str] = Field(None, description="Okta client secret (required if using client_id)")

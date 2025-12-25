@@ -11,7 +11,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="okta-ai-sdk-proto",
-    version="1.0.1",
+    version="1.0.2",
     author="Okta Inc.",
     author_email="developers@okta.com",
     description="Comprehensive Okta SDK for AI applications with Token Exchange and Cross-App Access (ID-JAG) support",
