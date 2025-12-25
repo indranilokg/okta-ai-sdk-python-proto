@@ -79,10 +79,11 @@ sdk = OktaAISDK(config)
 from okta_ai_sdk import TokenExchangeRequest
 
 # Exchange an access token for a new token with different audience
+# Note: subject_token_type requires the full URN value
 result = sdk.token_exchange.exchange_token(
     TokenExchangeRequest(
         subject_token="YOUR_ACCESS_TOKEN",
-        subject_token_type="urn:ietf:params:oauth:token-type:access_token",
+        subject_token_type="urn:ietf:params:oauth:token-type:access_token",  # Full URN required
         audience="https://api.example.com",
         scope="read write"
     )
@@ -90,6 +91,10 @@ result = sdk.token_exchange.exchange_token(
 
 print(f"New token: {result.access_token}")
 ```
+
+**Note:** For `TokenExchangeRequest`, `subject_token_type` must be the full URN:
+- `"urn:ietf:params:oauth:token-type:access_token"` for access tokens
+- `"urn:ietf:params:oauth:token-type:id_token"` for ID tokens
 
 ### Cross-App Access (ID-JAG)
 
@@ -108,12 +113,13 @@ id_jag_audience = f"{sdk.config.okta_domain}/oauth2/{sdk.config.authorization_se
 
 # STEP 1: Exchange ID token or access token for ID-JAG token
 # Uses JWT bearer assertion automatically from config
-# token_type defaults to "id_token", can also be "access_token"
+# Note: token_type uses simple strings ("id_token" or "access_token"), not full URN
+# The SDK converts these to URN format internally
 id_jag_result = sdk.cross_app_access.exchange_token(
     token="YOUR_ID_TOKEN",  # Can also be an access token
     audience=id_jag_audience,
     scope="mcp:read",
-    token_type="id_token"  # Optional: "id_token" (default) or "access_token"
+    token_type="id_token"  # Optional: "id_token" (default) or "access_token" - simple strings, not URN
 )
 print(f" ID-JAG token obtained (expires in {id_jag_result.expires_in}s)")
 
