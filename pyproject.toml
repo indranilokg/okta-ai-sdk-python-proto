@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "okta-ai-sdk-proto"
-version = "1.0.2"
-description = "Comprehensive Okta SDK for AI applications with Token Exchange and Cross-App Access (ID-JAG) support"
+version = "1.0.3"
+description = "Comprehensive Okta SDK for AI applications with Token Exchange, Cross-App Access (ID-JAG), and Connected Accounts support"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [

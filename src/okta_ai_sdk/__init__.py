@@ -2,12 +2,13 @@
 Okta AI SDK for Python
 
 A comprehensive Python SDK for Okta AI applications with support for 
-Token Exchange and Cross-App Access (ID-JAG).
+Token Exchange, Cross-App Access (ID-JAG), and Connected Accounts.
 """
 
 from .core.sdk import OktaAISDK
 from .token_exchange.client import TokenExchangeClient
 from .cross_app_access.client import CrossAppAccessClient
+from .connected_accounts.client import ConnectedAccountsClient
 
 # Type exports
 from .types import (
@@ -30,9 +31,16 @@ from .types import (
     AuthServerTokenResponse,
     AuthServerTokenVerificationOptions,
     AuthServerTokenVerificationResult,
+    
+    # Connected Accounts types
+    Auth0Config,
+    GetExternalProviderTokenRequest,
+    GetExternalProviderTokenResponse,
+    CompleteLinkingAndGetTokenRequest,
+    CompleteLinkingAndGetTokenResponse,
 )
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "Okta Inc."
 
 __all__ = [
@@ -42,6 +50,7 @@ __all__ = [
     # Client classes
     "TokenExchangeClient",
     "CrossAppAccessClient",
+    "ConnectedAccountsClient",
     
     # Core types
     "OktaAIConfig",
@@ -62,5 +71,12 @@ __all__ = [
     "AuthServerTokenResponse",
     "AuthServerTokenVerificationOptions",
     "AuthServerTokenVerificationResult",
+    
+    # Connected Accounts types
+    "Auth0Config",
+    "GetExternalProviderTokenRequest",
+    "GetExternalProviderTokenResponse",
+    "CompleteLinkingAndGetTokenRequest",
+    "CompleteLinkingAndGetTokenResponse",
 ]
 

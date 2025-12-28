@@ -25,6 +25,15 @@ from .cross_app_access import (
     AuthServerTokenVerificationResult,
 )
 
+# Import connected_accounts types from the module
+from ..connected_accounts.types import (
+    Auth0Config,
+    GetExternalProviderTokenRequest,
+    GetExternalProviderTokenResponse,
+    CompleteLinkingAndGetTokenRequest,
+    CompleteLinkingAndGetTokenResponse,
+)
+
 __all__ = [
     # Core types
     "OktaAIConfig",
@@ -45,5 +54,12 @@ __all__ = [
     "AuthServerTokenResponse",
     "AuthServerTokenVerificationOptions",
     "AuthServerTokenVerificationResult",
+    
+    # Connected Accounts types
+    "Auth0Config",
+    "GetExternalProviderTokenRequest",
+    "GetExternalProviderTokenResponse",
+    "CompleteLinkingAndGetTokenRequest",
+    "CompleteLinkingAndGetTokenResponse",
 ]
 

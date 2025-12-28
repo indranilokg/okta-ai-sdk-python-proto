@@ -1,7 +1,7 @@
 """
 Main Okta AI SDK class
 
-Provides unified access to Token Exchange and Cross-App Access functionality
+Provides unified access to Token Exchange, Cross-App Access, and Connected Accounts functionality
 """
 
 from typing import Optional
@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from ..types import OktaAIConfig, SDKError
 from ..token_exchange.client import TokenExchangeClient
 from ..cross_app_access.client import CrossAppAccessClient
+from ..connected_accounts.client import ConnectedAccountsClient
 
 
 class OktaAISDK:
@@ -23,6 +24,9 @@ class OktaAISDK:
         # Initialize sub-clients
         self.token_exchange = TokenExchangeClient(self._config)
         self.cross_app_access = CrossAppAccessClient(self._config)
+        # ConnectedAccountsClient only needs timeout (Auth0 flow doesn't use Okta config)
+        timeout_seconds = (self._config.timeout / 1000) if self._config.timeout else 30
+        self.connected_accounts = ConnectedAccountsClient(timeout=timeout_seconds)
 
     @property
     def config(self) -> OktaAIConfig:
@@ -45,6 +49,9 @@ class OktaAISDK:
         # Reinitialize sub-clients with new config
         self.token_exchange = TokenExchangeClient(self._config)
         self.cross_app_access = CrossAppAccessClient(self._config)
+        # ConnectedAccountsClient only needs timeout (Auth0 flow doesn't use Okta config)
+        timeout_seconds = (self._config.timeout / 1000) if self._config.timeout else 30
+        self.connected_accounts = ConnectedAccountsClient(timeout=timeout_seconds)
 
     def _validate_config(self, config: OktaAIConfig) -> None:
         """Validate SDK configuration"""

@@ -201,6 +201,9 @@ logs/
 test-results/
 test-reports/
 
+# Local test folder (contains sensitive credentials)
+test/
+
 # Documentation build
 docs/build/
 docs/_build/
